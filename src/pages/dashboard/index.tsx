@@ -1,5 +1,5 @@
 import React from "react"
-import { Row, Col } from 'antd';
+import { Row, Col, Statistic } from 'antd';
 import { Line, Pie } from '@ant-design/plots';
 
 const line_config = {
@@ -77,6 +77,17 @@ const pie_source_config = {
 export const DashboardPage: React.FC = () => {
     return (
         <div>
+            <Row gutter={16} style={{ marginBottom: 24 }}>
+                <Col span={8}>
+                    <Statistic valueStyle={{ color: 'red' }} title='Overdue tasks' value={50} />
+                </Col>
+                <Col span={8}>
+                    <Statistic valueStyle={{ color: 'gold' }} title='Tasks with close deadlines' value={100} />
+                </Col>
+                <Col span={8}>
+                    <Statistic title='Abandoned tasks' value={200} />
+                </Col>
+            </Row>
             <Row style={{ marginBottom: 24 }}>
                 <Col span={24}>
                     <Line {...line_config} />

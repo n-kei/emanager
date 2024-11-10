@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { HomeFilled, BugFilled } from '@ant-design/icons';
+import { HomeFilled, BugFilled, BranchesOutlined } from '@ant-design/icons';
 import { Layout, Menu, theme } from 'antd'
 import { AutoComplete, Input } from 'antd'
 import { Outlet } from 'react-router-dom';
@@ -40,6 +40,9 @@ export const CommonLayout: React.FC = () => {
           </Menu.Item>
           <Menu.Item key="/incidents" icon={<BugFilled />}>
             <Link to="/incidents">Incidents</Link>
+          </Menu.Item>
+          <Menu.Item key="/versions" icon={<BranchesOutlined />}>
+            <Link to="/versions">Versions</Link>
           </Menu.Item>
         </Menu>
       </Sider>

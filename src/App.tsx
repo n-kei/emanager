@@ -35,6 +35,7 @@ import { IncidentsPage } from './pages/incidents';
 import { EditIncidentPage } from './pages/incidents/edit';
 import { CreateIncidentPage } from './pages/incidents/create/create';
 import { FormatErrorPage } from './pages/format_error';
+import { VersionsPage } from './pages/versions';
 
 const App = () => {
   return (
@@ -48,7 +49,9 @@ const App = () => {
             <Route path="edit/:id" element={<EditIncidentPage/>} />
             <Route path="create" element={<CreateIncidentPage/>} />
           </Route>
-        </Route>
+          <Route path="/versions" element={<VersionsPage/>} />
+            <Route index element={<VersionsPage/>} />
+          </Route>
       </Routes>
     </Router>
   );

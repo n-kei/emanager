@@ -1,34 +1,45 @@
 import React from "react";
 import { EyeOutlined, DeleteOutlined, PlusSquareOutlined, CloseCircleFilled, CheckCircleFilled } from '@ant-design/icons';
 import { Button } from 'antd';
+import { Select } from 'antd';
 import { Space, Table, Tag} from 'antd'
 import { Row, Col } from 'antd';
 import type { TableProps } from "antd";
 import { Link } from 'react-router-dom';
 import { Popover } from 'antd';
+import { render } from "@testing-library/react";
 
 interface DataType {
     key: string
+    progress: string
     status: string
     ticket_id: string
     title: string
     tags: string[]
+    elapsed_days: number
+    remaining_days: number
 }
 
 const data: DataType[] = [
     {
         key: '1',
+        progress: 'New',
         status: 'ok',
         ticket_id: 'T001',
         title: 'PCIe error',
-        tags: ['critical', 'emergency', 'error']
+        tags: ['critical', 'emergency', 'error'],
+        elapsed_days: 30,
+        remaining_days: 6,
     },
     {
         key: '2',
+        progress: 'In Progress',
         status: 'ng',
         ticket_id: 'T002',
         title: 'BIOS error',
-        tags: ['warning', 'error']
+        tags: ['warning', 'error'],
+        elapsed_days: 10,
+        remaining_days: -1,
     }
 ]
 
@@ -40,6 +51,20 @@ const errors = (
 )
 
 const columns = [
+    {
+        title: 'Progress',
+        dataIndex: 'progress',
+        key: 'progress',
+        filters: data.map(item => ({ text: item.progress, value: item.progress })),
+        onFilter: (value: any, record: DataType) => record.progress === value,
+        render: (status: string) => (
+            <Select defaultValue={status} style={{ width: 120 }}>
+                <Select.Option value="New">New</Select.Option>
+                <Select.Option value="In Progress">In Progress</Select.Option>
+                <Select.Option value="Resolved">Resolved</Select.Option>
+            </Select>
+        )
+    },
     {
         title: 'Status',
         dataIndex: 'status',
@@ -88,6 +113,26 @@ const columns = [
                     )
                 })}
             </>
+        )
+    },
+    {
+        title: 'Elapsed days',
+        dataIndex: 'elapsed_days',
+        filters: [{ text: 'abandoned', value: 'abandoned' }],
+        onFilter: (value: any, record: DataType) => value === 'abandoned' ? record.elapsed_days >= 30 : false,
+        key: 'elapsed_days',
+        render: (elapsed_days: number) => (
+            elapsed_days >= 30 ? <p style={{color: 'red'}}>{elapsed_days}</p> : <p style={{color: 'black'}}>{elapsed_days}</p>
+        )
+    },
+    {
+        title: 'Remaining days',
+        dataIndex: 'remaining_days',
+        filters: [{ text: 'overdue', value: 'overdue' }, { text: 'close deadlines', value: 'close deadlines' }],
+        onFilter: (value: any, record: DataType) => value === 'overdue' ? record.remaining_days < 0 :  value === 'close deadlines' ? record.remaining_days > 0 && record.remaining_days < 7 : false,
+        key: 'remaining_days',
+        render: (remaining_days: number) => (
+            remaining_days < 0 ? <p style={{color: 'red'}}>{remaining_days}</p> : <p style={{color: 'black'}}>{remaining_days}</p>
         )
     },
     {
