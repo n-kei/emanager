@@ -10,9 +10,8 @@ const tagInputStyle: React.CSSProperties = {
   verticalAlign: 'top',
 };
 
-export const EmanagerTag: React.FC = () => {
+export const EmanagerTag: React.FC<{tags: string[], setTags: (tags: string[]) => void}> = ({tags, setTags}) => {
   const { token } = theme.useToken();
-  const [tags, setTags] = useState<string[]>(['Unremovable', 'Tag 2', 'Tag 3']);
   const [inputVisible, setInputVisible] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [editInputIndex, setEditInputIndex] = useState(-1);
@@ -91,7 +90,7 @@ export const EmanagerTag: React.FC = () => {
         const tagElem = (
           <Tag
             key={tag}
-            closable={index !== 0}
+            closable={true}
             style={{ userSelect: 'none' }}
             onClose={() => handleClose(tag)}
           >

@@ -1,10 +1,11 @@
 'use client'
 import React from 'react';
-import { HomeFilled, BugFilled, BranchesOutlined } from '@ant-design/icons';
-import { Layout, Menu, theme } from 'antd'
-import { AutoComplete, Input } from 'antd'
+import { HomeFilled, BugFilled, BranchesOutlined, SaveFilled, SaveOutlined } from '@ant-design/icons';
+import { Button, Layout, Menu, theme } from 'antd'
 import { Outlet } from 'react-router-dom';
 import { Link } from 'react-router-dom';
+import { saveIncidents } from '../../hooks';
+import { IncidentType } from '../../types';
 
 const { Header, Content, Footer, Sider } = Layout
 
@@ -16,7 +17,8 @@ const items = [HomeFilled, BugFilled].map(
     path: index == 0 ? '/' : '/incidents',
   }),
 );
-export const CommonLayout: React.FC = () => {
+
+export const CommonLayout: React.FC<{incidents: IncidentType[]}> = ({incidents}) => {
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
@@ -48,10 +50,7 @@ export const CommonLayout: React.FC = () => {
       </Sider>
       <Layout>
         <Header style={{ height: 65, margin: '0vh 1vh 0vh', padding: '0 24px', background: colorBgContainer }}>
-          <AutoComplete
-            style={{ width: 200 }}
-            placeholder="input here"
-          />
+          <Button icon={<SaveFilled/>} onClick={() => {saveIncidents(incidents)}}/>
         </Header>
 
         <Content style={{ margin: '2vh 1vh 2vh' }}>

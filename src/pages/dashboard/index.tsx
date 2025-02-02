@@ -1,91 +1,90 @@
 import React from "react"
 import { Row, Col, Statistic } from 'antd';
 import { Line, Pie } from '@ant-design/plots';
+import { IncidentType } from "../../types";
+import dayjs from 'dayjs';
 
-const line_config = {
-    title: 'incidents per day',
-    data: [
-        {day: '4/1', incidents: 3},
-        {day: '4/2', incidents: 4},
-        {day: '4/3', incidents: 3.5},
-        {day: '4/4', incidents: 5},
-        {day: '4/5', incidents: 4.9},
-        {day: '4/6', incidents: 6},
-        {day: '4/7', incidents: 7},
-        {day: '4/8', incidents: 9},
-        {day: '4/9', incidents: 13},
-    ],
-    xField: 'day',
-    yField: 'incidents',
-};
+export const DashboardPage: React.FC<{incidents: IncidentType[]}> = ({incidents}) => {
+    const overdue_tasks = incidents.filter(incident => incident.due_date.isBefore(dayjs())).length;
+    const close_deadline_tasks = incidents.filter(incident => incident.due_date.isBefore(dayjs().add(7, 'day'))).length;
+    const abandoned_tasks = incidents.filter(incident => incident.progress === 'New' && incident.elapsed_days >= 7).length;
 
-const pie_category_config = {
-    title: 'error category',
-    data: [
-        { type: 'PCIe', value: 27 },
-        { type: 'I2C', value: 25 },
-        { type: 'Display', value: 18 },
-        { type: 'I3C', value: 15 },
-        { type: 'Serdes', value: 10 },
-        { type: 'Other', value: 5 },
-    ],
-    angleField: 'value',
-    colorField: 'type',
-    label: {
-        text: 'value',
-        style: {
-            fontWeight: 'bold',
+    const count_creattion_date = incidents.reduce((acc, incident) => {
+        const date = incident.creation_date.format('YYYY-MM-DD');
+        acc[date] = acc[date] ? acc[date] + 1 : 1;
+        return acc;
+    }, {} as {[key: string]: number});
+    const count_error_category = incidents.reduce((acc, incident) => {
+        incident.error_category_tags.forEach(tag => {
+            acc[tag] = acc[tag] ? acc[tag] + 1 : 1;
+        });
+        return acc;
+    }, {} as {[key: string]: number});
+    const count_error_source = incidents.reduce((acc, incident) => {
+        incident.error_source_tags.forEach(tag => {
+            acc[tag] = acc[tag] ? acc[tag] + 1 : 1;
+        });
+        return acc;
+    }, {} as {[key: string]: number});
+
+    const line_config = {
+        title: 'incidents per day',
+        data: Object.keys(count_creattion_date).map(key => ({day: key, incidents: count_creattion_date[key]})),
+        xField: 'day',
+        yField: 'incidents',
+    };
+
+    const pie_category_config = {
+        title: 'error category',
+        data: Object.keys(count_error_category).map(key => ({type: key, value: count_error_category[key]})),
+        angleField: 'value',
+        colorField: 'type',
+        label: {
+            text: 'value',
+            style: {
+                fontWeight: 'bold',
+            },
         },
-    },
-    legend: {
-        color: {
-            title: false,
-            position: 'right',
-            rowPadding: 5,
+        legend: {
+            color: {
+                title: false,
+                position: 'right',
+                rowPadding: 5,
+            },
         },
-    },
-};
+    };
 
-const pie_source_config = {
-    title: 'error source',
-    data: [
-        { type: 'xxx.c', value: 27 },
-        { type: 'yyy.c', value: 25 },
-        { type: 'hoge.c', value: 18 },
-        { type: 'huga.c', value: 15 },
-        { type: 'piyo.c', value: 10 },
-        { type: 'Other', value: 5 },
-    ],
-    angleField: 'value',
-    colorField: 'type',
-    label: {
-        text: 'value',
-        style: {
-            fontWeight: 'bold',
+    const pie_source_config = {
+        title: 'error source',
+        data: Object.keys(count_error_source).map(key => ({type: key, value: count_error_source[key]})),
+        angleField: 'value',
+        colorField: 'type',
+        label: {
+            text: 'value',
+            style: {
+                fontWeight: 'bold',
+            },
         },
-    },
-    legend: {
-        color: {
-            title: false,
-            position: 'right',
-            rowPadding: 5,
+        legend: {
+            color: {
+                title: false,
+                position: 'right',
+                rowPadding: 5,
+            },
         },
-    },
-};
+    };
 
-
-export const DashboardPage: React.FC = () => {
     return (
         <div>
             <Row gutter={16} style={{ marginBottom: 24 }}>
                 <Col span={8}>
-                    <Statistic valueStyle={{ color: 'red' }} title='Overdue tasks' value={50} />
+                    <Statistic valueStyle={{ color: 'red' }} title='Overdue tasks' value={overdue_tasks} />
                 </Col>
                 <Col span={8}>
-                    <Statistic valueStyle={{ color: 'gold' }} title='Tasks with close deadlines' value={100} />
+                    <Statistic valueStyle={{ color: 'gold' }} title='Tasks with close deadlines' value={close_deadline_tasks} />
                 </Col>
                 <Col span={8}>
-                    <Statistic title='Abandoned tasks' value={200} />
+                    <Statistic title='Abandoned tasks' value={abandoned_tasks} />
                 </Col>
             </Row>
             <Row style={{ marginBottom: 24 }}>
