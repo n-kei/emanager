@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { IncidentType } from './types';
+import { deleteIncidentType, IncidentType } from './types';
 import { addIncidentType, editIncidentType } from './types';
 import dayjs from 'dayjs';
 import { error } from 'console';
@@ -69,6 +69,10 @@ export const useIncidents = () => {
     setIncidents(incidents.map(i => i.key === key ? incident : i));
   }
 
-  return [incidents, {addIncident, editIncident}] as const;
+  const deleteIncident: deleteIncidentType = (key: string) => {
+    setIncidents(incidents.filter(i => i.key !== key));
+  }
+
+  return [incidents, {addIncident, editIncident, deleteIncident}] as const;
 
 }

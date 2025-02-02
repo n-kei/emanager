@@ -11,7 +11,7 @@ import { VersionsPage } from './pages/versions';
 import { useIncidents } from './hooks';
 
 const App = () => {
-  const [incidents, {addIncident, editIncident}] = useIncidents();
+  const [incidents, {addIncident, editIncident, deleteIncident}] = useIncidents();
 
   return (
     <Router>
@@ -20,7 +20,7 @@ const App = () => {
         <Route path="/" element={<CommonLayout incidents={incidents}/>}>
           <Route index element={<DashboardPage incidents={incidents}/>} />
           <Route path="/incidents">
-            <Route index element={<IncidentsPage incidents={incidents}/>} />
+            <Route index element={<IncidentsPage incidents={incidents} deleteIncident={deleteIncident}/>} />
             <Route path="edit/:id" element={<EditIncidentPage incidents={incidents} editIncident={editIncident}/>} />
             <Route path="create" element={<CreateIncidentPage incidents={incidents} addIncident={addIncident}/>} />
           </Route>

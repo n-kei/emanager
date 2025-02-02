@@ -5,12 +5,13 @@ import { Select } from 'antd';
 import { Space, Table, Tag} from 'antd'
 import { Row, Col } from 'antd';
 import type { TableProps } from "antd";
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Popover } from 'antd';
 import { render } from "@testing-library/react";
-import { IncidentType } from "../../types";
+import { deleteIncidentType, IncidentType } from "../../types";
 
-export const IncidentsPage: React.FC<{incidents: IncidentType[]}> = ({incidents}) => {
+export const IncidentsPage: React.FC<{incidents: IncidentType[], deleteIncident: deleteIncidentType}> = ({incidents, deleteIncident}) => {
+    const navigate = useNavigate();
     const errors = (
         <div>
             <p>ERROR: hogehoge</p>
@@ -154,9 +155,8 @@ export const IncidentsPage: React.FC<{incidents: IncidentType[]}> = ({incidents}
             key: 'action',
             render: (text:String, record: IncidentType, index:Number) => (
                 <Space size="middle">
-                    <Link to={"/incidents/edit/" + record.key}><EyeOutlined/></Link>
-                    {/*TODO: deleteの実装*/}
-                    <a><DeleteOutlined/></a>
+                    <Button type='text' icon={<EyeOutlined/>} onClick={() => navigate('/incidents/edit/' + record.key)}/>
+                    <Button type='text' icon={<DeleteOutlined onClick={() => deleteIncident(record.key)} />}/>
                 </Space>
             )
         }

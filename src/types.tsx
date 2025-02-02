@@ -19,3 +19,4 @@ export interface IncidentType {
 
 export type addIncidentType = (incident: IncidentType) => void
 export type editIncidentType = (key: string, incident: IncidentType) => void
+export type deleteIncidentType = (key: string) => void
