@@ -8,24 +8,19 @@ import type { TableProps } from "antd";
 import { Link, useNavigate } from 'react-router-dom';
 import { Popover } from 'antd';
 import { render } from "@testing-library/react";
-import { deleteIncidentType, IncidentType } from "../../types";
+import { deleteIssueType, IssueType } from "../../types";
+import { TableColumnsType } from "antd";
 
-export const IncidentsPage: React.FC<{incidents: IncidentType[], deleteIncident: deleteIncidentType}> = ({incidents, deleteIncident}) => {
+export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssueType}> = ({issues, deleteIssue}) => {
     const navigate = useNavigate();
-    const errors = (
-        <div>
-            <p>ERROR: hogehoge</p>
-            <p>WARN: hugahuga</p>
-        </div>
-    )
 
-    const columns = [
+    const columns: TableColumnsType<IssueType> = [
         {
+            key: 'progress',
             title: 'Progress',
             dataIndex: 'progress',
-            key: 'progress',
-            filters: incidents.map(item => ({ text: item.progress, value: item.progress })),
-            onFilter: (value: any, record: IncidentType) => record.progress === value,
+            filters: issues.map(item => ({ text: item.progress, value: item.progress })),
+            onFilter: (value: any, record: IssueType) => record.progress === value,
             render: (status: string) => (
                 <Select defaultValue={status} style={{ width: 120 }}>
                     <Select.Option value="New">New</Select.Option>
@@ -34,41 +29,29 @@ export const IncidentsPage: React.FC<{incidents: IncidentType[], deleteIncident:
                 </Select>
             )
         },
-        //TODO: statusの表示を実装する
-        //{
-        //    title: 'Status',
-        //    dataIndex: 'status',
-        //    key: 'status',
-        //    filters: incidents.map(item => ({ text: item.status, value: item.status })),
-        //    onFilter: (value: any, record: IncidentType) => record.status === value,
-        //    render: (status: string) => (
-        //        status === 'ok' ? <CheckCircleFilled style={{color: 'green'}}/> :
-        //        <Popover content={errors} title="Erros and Warnings"> <CloseCircleFilled style={{color: 'red'}}/> </Popover>
-        //    )
-        //},
         {
+            key: 'ticket_id',
             title: 'Ticket ID',
             dataIndex: 'ticket_id',
-            key: 'ticket_id',
-            filters: incidents.map(item => ({ text: item.ticket_id, value: item.ticket_id })),
+            filters: issues.map(item => ({ text: item.ticket_id, value: item.ticket_id })),
             filterSearch: true,
-            onFilter: (value: any, record: IncidentType) => record.ticket_id.includes(value),
+            onFilter: (value: any, record: IssueType) => record.ticket_id.includes(value),
         },
         {
+            key: 'title',
             title: 'Title',
             dataIndex: 'title',
-            filters: incidents.map(item => ({ text: item.title, value: item.title })),
+            filters: issues.map(item => ({ text: item.title, value: item.title })),
             filterSearch: true,
-            onFilter: (value: any, record: IncidentType) => record.title.includes(value),
-            key: 'title',
+            onFilter: (value: any, record: IssueType) => record.title.includes(value),
         },
         {
-            title: 'Systems',
             key: 'system_tags',
+            title: 'Systems',
             dataIndex: 'system_tags',
-            filters: Array.from(new Set(incidents.map(item => item.system_tags.map(tag => ({ text: tag, value: tag }))).flat())),
+            filters: Array.from(new Set(issues.map(item => item.system_tags.map(tag => ({ text: tag, value: tag }))).flat())),
             filterSearch: true,
-            onFilter: (value: any, record: IncidentType) => record.system_tags.includes(value),
+            onFilter: (value: any, record: IssueType) => record.system_tags.includes(value),
             render: (tags: string[]) => (
                 <>
                     {tags.map(tag => {
@@ -83,12 +66,12 @@ export const IncidentsPage: React.FC<{incidents: IncidentType[], deleteIncident:
             )
         },
         {
-            title: 'Error Source',
             key: 'error_source_tags',
+            title: 'Error Source',
             dataIndex: 'error_source_tags',
-            filters: Array.from(new Set(incidents.map(item => item.error_source_tags.map(tag => ({ text: tag, value: tag }))).flat())),
+            filters: Array.from(new Set(issues.map(item => item.error_source_tags.map(tag => ({ text: tag, value: tag }))).flat())),
             filterSearch: true,
-            onFilter: (value: any, record: IncidentType) => record.system_tags.includes(value),
+            onFilter: (value: any, record: IssueType) => record.system_tags.includes(value),
             render: (tags: string[]) => (
                 <>
                     {tags.map(tag => {
@@ -103,12 +86,12 @@ export const IncidentsPage: React.FC<{incidents: IncidentType[], deleteIncident:
             )
         },
         {
-            title: 'Error Category',
             key: 'error_category_tags',
+            title: 'Error Category',
             dataIndex: 'error_category_tags',
-            filters: Array.from(new Set(incidents.map(item => item.error_category_tags.map(tag => ({ text: tag, value: tag }))).flat())),
+            filters: Array.from(new Set(issues.map(item => item.error_category_tags.map(tag => ({ text: tag, value: tag }))).flat())),
             filterSearch: true,
-            onFilter: (value: any, record: IncidentType) => record.system_tags.includes(value),
+            onFilter: (value: any, record: IssueType) => record.system_tags.includes(value),
             render: (tags: string[]) => (
                 <>
                     {tags.map(tag => {
@@ -123,40 +106,42 @@ export const IncidentsPage: React.FC<{incidents: IncidentType[], deleteIncident:
             )
         },
         {
+            key: 'title',
             title: 'Priority',
             dataIndex: 'priority',
-            filters: incidents.map(item => ({ text: item.title, value: item.title })),
+            filters: issues.map(item => ({ text: item.title, value: item.title })),
             filterSearch: true,
-            onFilter: (value: any, record: IncidentType) => record.title.includes(value),
-            key: 'title',
+            onFilter: (value: any, record: IssueType) => record.title.includes(value),
         },
         {
+            key: 'elapsed_days',
             title: 'Elapsed days',
             dataIndex: 'elapsed_days',
             filters: [{ text: 'abandoned', value: 'abandoned' }],
-            onFilter: (value: any, record: IncidentType) => value === 'abandoned' ? record.elapsed_days >= 30 : false,
-            key: 'elapsed_days',
+            onFilter: (value: any, record: IssueType) => value === 'abandoned' ? record.elapsed_days >= 30 : false,
             render: (elapsed_days: number) => (
                 elapsed_days >= 30 ? <p style={{color: 'red'}}>{elapsed_days}</p> : <p style={{color: 'black'}}>{elapsed_days}</p>
             )
         },
         {
+            key: 'remaining_days',
             title: 'Remaining days',
             dataIndex: 'remaining_days',
             filters: [{ text: 'overdue', value: 'overdue' }, { text: 'close deadlines', value: 'close deadlines' }],
-            onFilter: (value: any, record: IncidentType) => value === 'overdue' ? record.remaining_days < 0 :  value === 'close deadlines' ? record.remaining_days > 0 && record.remaining_days < 7 : false,
-            key: 'remaining_days',
+            onFilter: (value: any, record: IssueType) => value === 'overdue' ? record.remaining_days < 0 :  value === 'close deadlines' ? record.remaining_days > 0 && record.remaining_days < 7 : false,
             render: (remaining_days: number) => (
                 remaining_days < 0 ? <p style={{color: 'red'}}>{remaining_days}</p> : <p style={{color: 'black'}}>{remaining_days}</p>
             )
         },
         {
-            title: 'Action',
             key: 'action',
-            render: (text:String, record: IncidentType, index:Number) => (
+            title: 'Action',
+            dataIndex: 'action',
+            fixed: 'right',
+            render: (text:String, record: IssueType, index:Number) => (
                 <Space size="middle">
-                    <Button type='text' icon={<EyeOutlined/>} onClick={() => navigate('/incidents/edit/' + record.key)}/>
-                    <Button type='text' icon={<DeleteOutlined onClick={() => deleteIncident(record.key)} />}/>
+                    <Button type='text' icon={<EyeOutlined/>} onClick={() => navigate('/issues/edit/' + record.key)}/>
+                    <Button type='text' icon={<DeleteOutlined onClick={() => deleteIssue(record.key)} />}/>
                 </Space>
             )
         }
@@ -165,15 +150,19 @@ export const IncidentsPage: React.FC<{incidents: IncidentType[], deleteIncident:
         <div>
             <Row style={{ marginBottom: 24 }}>
                 <Col span={12}>
-                    <h1>Incidents</h1>
+                    <h1>Issues</h1>
                 </Col>
                 <Col span={12} style={{ textAlign: 'right' }}>
                     <Button type='primary' icon={<PlusSquareOutlined/>}>
-                        <Link to={"/incidents/create"}>Create new incident </Link>
+                        <Link to={"/issues/create"}>Create new Issue </Link>
                     </Button>
                 </Col>
             </Row>
-            <Table<IncidentType> columns={columns} dataSource={incidents} />
+            <Table<IssueType> 
+                columns={columns} 
+                dataSource={issues} 
+                scroll={{ x: 'max-content', y: 'max-content' }}
+            />
         </div>
     )
 }

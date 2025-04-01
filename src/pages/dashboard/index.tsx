@@ -1,41 +1,41 @@
 import React from "react"
 import { Row, Col, Statistic } from 'antd';
 import { Line, Pie } from '@ant-design/plots';
-import { IncidentType } from "../../types";
+import { IssueType } from "../../types";
 import dayjs from 'dayjs';
 
-export const DashboardPage: React.FC<{incidents: IncidentType[]}> = ({incidents}) => {
-    const overdue_tasks = incidents.filter(incident => incident.due_date.isBefore(dayjs())).length;
-    const close_deadline_tasks = incidents.filter(incident => incident.due_date.isBefore(dayjs().add(7, 'day'))).length;
-    const abandoned_tasks = incidents.filter(incident => incident.progress === 'New' && incident.elapsed_days >= 7).length;
+export const DashboardPage: React.FC<{issues: IssueType[]}> = ({issues}) => {
+    const overdue_tasks = issues.filter(Issue => Issue.due_date.isBefore(dayjs())).length;
+    const close_deadline_tasks = issues.filter(Issue => Issue.due_date.isBefore(dayjs().add(7, 'day'))).length;
+    const abandoned_tasks = issues.filter(Issue => Issue.progress === 'New' && Issue.elapsed_days >= 7).length;
 
-    const count_creattion_date = incidents.reduce((acc, incident) => {
-        const date = incident.creation_date.format('YYYY-MM-DD');
+    const count_creattion_date = issues.reduce((acc, Issue) => {
+        const date = Issue.creation_date.format('YYYY-MM-DD');
         acc[date] = acc[date] ? acc[date] + 1 : 1;
         return acc;
     }, {} as {[key: string]: number});
-    const count_error_category = incidents.reduce((acc, incident) => {
-        incident.error_category_tags.forEach(tag => {
+    const count_error_category = issues.reduce((acc, Issue) => {
+        Issue.error_category_tags.forEach(tag => {
             acc[tag] = acc[tag] ? acc[tag] + 1 : 1;
         });
         return acc;
     }, {} as {[key: string]: number});
-    const count_error_source = incidents.reduce((acc, incident) => {
-        incident.error_source_tags.forEach(tag => {
+    const count_error_source = issues.reduce((acc, Issue) => {
+        Issue.error_source_tags.forEach(tag => {
             acc[tag] = acc[tag] ? acc[tag] + 1 : 1;
         });
         return acc;
     }, {} as {[key: string]: number});
 
     const line_config = {
-        title: 'incidents per day',
-        data: Object.keys(count_creattion_date).map(key => ({day: key, incidents: count_creattion_date[key]})),
+        title: 'Issues per day',
+        data: Object.keys(count_creattion_date).map(key => ({day: key, issues: count_creattion_date[key]})),
         xField: 'day',
-        yField: 'incidents',
+        yField: 'issues',
     };
 
     const pie_category_config = {
-        title: 'error category',
+        title: 'Error category',
         data: Object.keys(count_error_category).map(key => ({type: key, value: count_error_category[key]})),
         angleField: 'value',
         colorField: 'type',
@@ -55,7 +55,7 @@ export const DashboardPage: React.FC<{incidents: IncidentType[]}> = ({incidents}
     };
 
     const pie_source_config = {
-        title: 'error source',
+        title: 'Error source',
         data: Object.keys(count_error_source).map(key => ({type: key, value: count_error_source[key]})),
         angleField: 'value',
         colorField: 'type',

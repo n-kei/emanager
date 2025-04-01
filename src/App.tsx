@@ -3,30 +3,29 @@ import { DatePicker } from 'antd';
 import { CommonLayout } from './components/layout';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { DashboardPage } from './pages/dashboard';
-import { IncidentsPage } from './pages/incidents';
-import { EditIncidentPage } from './pages/incidents/edit';
-import { CreateIncidentPage } from './pages/incidents/create';
-import { FormatErrorPage } from './pages/format_error';
-import { VersionsPage } from './pages/versions';
-import { useIncidents } from './hooks';
+import { IssuesPage } from './pages/issues';
+import { EditIssuePage } from './pages/issues/edit';
+import { CreateIssuePage } from './pages/issues/create';
+import { WelcomePage } from './pages/welcome';
+import { useIssues } from './hooks';
 
 const App = () => {
-  const [incidents, {addIncident, editIncident, deleteIncident}] = useIncidents();
+  const [issues, {addIssue, editIssue, deleteIssue, loadIssues, saveIssues}] = useIssues();
 
   return (
     <Router>
       <Routes>
-        <Route path="/format_error" element={<FormatErrorPage/>} />
-        <Route path="/" element={<CommonLayout incidents={incidents}/>}>
-          <Route index element={<DashboardPage incidents={incidents}/>} />
-          <Route path="/incidents">
-            <Route index element={<IncidentsPage incidents={incidents} deleteIncident={deleteIncident}/>} />
-            <Route path="edit/:id" element={<EditIncidentPage incidents={incidents} editIncident={editIncident}/>} />
-            <Route path="create" element={<CreateIncidentPage incidents={incidents} addIncident={addIncident}/>} />
+        <Route path="/" element={<CommonLayout issues={issues} loadIssues={loadIssues} saveIssues={saveIssues}/>}>
+          <Route index element={<WelcomePage loadIssues={loadIssues}/>} />
+          <Route path="/dashboard">
+            <Route index element={<DashboardPage issues={issues}/>} />
           </Route>
-          <Route path="/versions" element={<VersionsPage/>} />
-            <Route index element={<VersionsPage/>} />
+          <Route path="/issues">
+            <Route index element={<IssuesPage issues={issues} deleteIssue={deleteIssue}/>} />
+            <Route path="edit/:id" element={<EditIssuePage issues={issues} editIssue={editIssue}/>} />
+            <Route path="create" element={<CreateIssuePage issues={issues} addIssue={addIssue}/>} />
           </Route>
+        </Route>
       </Routes>
     </Router>
   );
