@@ -57,12 +57,10 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
         editIssue(params.id as string, {...issue, ticket_link: value});
     }
     const set_outage_date = (value: Dayjs) => {
-        editIssue(params.id as string, {...issue, outage_date: value});
-        editIssue(params.id as string, {...issue, elapsed_days: dayjs().diff(value, 'day')});
-        editIssue(params.id as string, {...issue, remaining_days: issue.due_date.diff(value, 'day')});
+        editIssue(params.id as string, {...issue, outage_date: value, elapsed_days: dayjs().diff(value, 'day')});
     }
     const set_due_date = (value: Dayjs) => {
-        editIssue(params.id as string, {...issue, due_date: value});
+        editIssue(params.id as string, {...issue, due_date: value, remaining_days: value.diff(dayjs(), 'day')});
     }
     const add_comment = (value: string) => {
         editIssue(params.id as string, {...issue, comments: [...issue.comments, {date: dayjs(), comment: value}]});

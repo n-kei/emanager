@@ -9,7 +9,7 @@ import { Typography } from 'antd';
 const { Title } = Typography;
 
 export const DashboardPage: React.FC<{issues: IssueType[]}> = ({issues}) => {
-    const overdue_tasks = issues.filter(Issue => Issue.due_date.isBefore(dayjs())).length;
+    const overdue_tasks = issues.filter(issue => issue.due_date.isBefore(dayjs())).length;
     const close_deadline_tasks = issues.filter(Issue => Issue.due_date.isBefore(dayjs().add(7, 'day')) && Issue.due_date.isAfter(dayjs())).length;
     const abandoned_tasks = issues.filter(Issue => Issue.progress === 'New' && Issue.elapsed_days >= 7).length;
 
