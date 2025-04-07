@@ -17,7 +17,7 @@ export enum PriorityTypeEnum {
 export interface IssueType {
     key: string
     title: string
-    creation_date: Dayjs
+    outage_date: Dayjs
     abstract: string
     statement: string
     workaround: string
@@ -37,7 +37,9 @@ export interface IssueType {
 }
 
 export type addIssueType = (Issue: IssueType) => void
+export type addEmptyIssueType = () => string
 export type editIssueType = (key: string, Issue: IssueType) => void
 export type deleteIssueType = (key: string) => void
+export type newIssuesType = () => void
 export type saveIssuesType = () => void
 export type loadIssuesType = (info: UploadChangeParam) => void

@@ -14,7 +14,7 @@ import { Button } from 'antd';
 import { Typography } from 'antd';
 import { Descriptions, DescriptionsProps } from 'antd';
 import { Card } from 'antd';
-import { editIssueType, IssueType, PriorityTypeEnum, ProgressTypeEnum } from "../../../types";
+import { addEmptyIssueType, editIssueType, IssueType, PriorityTypeEnum, ProgressTypeEnum } from "../../../types";
 
 const { Title, Paragraph, Link } = Typography;
 
@@ -55,6 +55,11 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
     }
     const set_ticket_link = (value: string) => {
         editIssue(params.id as string, {...issue, ticket_link: value});
+    }
+    const set_outage_date = (value: Dayjs) => {
+        editIssue(params.id as string, {...issue, outage_date: value});
+        editIssue(params.id as string, {...issue, elapsed_days: dayjs().diff(value, 'day')});
+        editIssue(params.id as string, {...issue, remaining_days: issue.due_date.diff(value, 'day')});
     }
     const set_due_date = (value: Dayjs) => {
         editIssue(params.id as string, {...issue, due_date: value});
@@ -133,21 +138,26 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
             children: <Link href={issue.ticket_link.toString()} target="_blank">
                 <Paragraph editable={{ onChange: set_ticket_link }}>{issue.ticket_link}</Paragraph>
             </Link>
-        },
-        {
-            key: '3',
-            label: 'Due Date',
-            children: <DatePicker onChange={set_due_date} defaultValue={issue.due_date} />
-        } 
+        }
     ]
     const days: DescriptionsProps['items'] = [
         {
             key: '1',
+            label: 'Outage Date',
+            children: <DatePicker onChange={set_outage_date} defaultValue={issue.outage_date} />
+        },
+        {
+            key: '2',
+            label: 'Due Date',
+            children: <DatePicker onChange={set_due_date} defaultValue={issue.due_date} />
+        },
+        {
+            key: '3',
             label: 'Elapsed days',
             children: issue.elapsed_days
         },
         {
-            key: '2',
+            key: '4',
             label: 'Remaining days',
             children: issue.remaining_days
         }
@@ -164,9 +174,9 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
                     </Typography.Title>
                     <Button variant='outlined' icon={<MenuFoldOutlined/>} onClick={() => {setOpen(true)}}/>
                     <Drawer onClose={() => {setOpen(false)}} open={open}>
-                        <Descriptions column={1} items={tags}/>
-                        <Divider style={{borderColor: 'lightgray'}}/>
                         <Descriptions column={1} items={days}/>
+                        <Divider style={{borderColor: 'lightgray'}}/>
+                        <Descriptions column={1} items={tags}/>
                         <Divider style={{borderColor: 'lightgray'}}/>
                         <Descriptions column={1} items={sa_informations}/>
                         <Divider style={{borderColor: 'lightgray'}}/>

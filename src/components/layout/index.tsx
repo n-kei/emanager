@@ -46,7 +46,7 @@ export const CommonLayout: React.FC<{issues: IssueType[], loadIssues: loadIssues
         <Header style={{ height: 65, margin: '0vh 1vh 0vh', padding: '0 24px', background: colorBgContainer }}>
           <Space direction="horizontal" style={{ justifyContent: 'space-between', width: '100%' }}>
             <Space direction="horizontal">
-              <Upload accept=".xlsx, .xls" onChange={(info: UploadChangeParam) => {loadIssues(info);navigate('/dashboard')}} showUploadList={false}>
+              <Upload accept=".xlsx, .xls" onChange={(info: UploadChangeParam) => {loadIssues(info); navigate('/dashboard')}} showUploadList={false}>
                 <Button icon={<ImportOutlined/>}/>
               </Upload>
               <Button icon={<SaveFilled/>} onClick={saveIssues}/>

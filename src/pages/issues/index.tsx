@@ -1,6 +1,6 @@
 import React from "react";
 import { EyeOutlined, DeleteOutlined, PlusSquareOutlined, CloseCircleFilled, CheckCircleFilled } from '@ant-design/icons';
-import { Button } from 'antd';
+import { Button, Progress } from 'antd';
 import { Select } from 'antd';
 import { Space, Table, Tag} from 'antd'
 import { Row, Col } from 'antd';
@@ -8,32 +8,69 @@ import type { TableProps } from "antd";
 import { Link, useNavigate } from 'react-router-dom';
 import { Popover } from 'antd';
 import { render } from "@testing-library/react";
-import { deleteIssueType, IssueType } from "../../types";
+import { addEmptyIssueType, deleteIssueType, editIssueType, IssueType, ProgressTypeEnum, PriorityTypeEnum } from "../../types";
 import { TableColumnsType } from "antd";
+import { Dayjs } from 'dayjs';
 
-export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssueType}> = ({issues, deleteIssue}) => {
+export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyIssueType, deleteIssue: deleteIssueType, editIssue: editIssueType}> = ({issues, addEmptyIssue, deleteIssue, editIssue}) => {
     const navigate = useNavigate();
+
+    const handleAddEmptyIssue = () => {
+        const key = addEmptyIssue();
+        console.log(key);
+        navigate('/issues/edit/' + key);
+    }
+
+    const set_progress = (key: string, value: ProgressTypeEnum) => {
+        const issue = issues.filter(issue => issue.key === key)[0];
+        editIssue(key, {...issue, progress: value});
+    }
 
     const columns: TableColumnsType<IssueType> = [
         {
             key: 'progress',
             title: 'Progress',
             dataIndex: 'progress',
-            filters: issues.map(item => ({ text: item.progress, value: item.progress })),
+            filters: [
+                { text: ProgressTypeEnum.New, value: ProgressTypeEnum.New },
+                { text: ProgressTypeEnum.InProgress, value: ProgressTypeEnum.InProgress },
+                { text: ProgressTypeEnum.Resolved, value: ProgressTypeEnum.Resolved },
+                { text: ProgressTypeEnum.Closed, value: ProgressTypeEnum.Closed },
+            ], 
             onFilter: (value: any, record: IssueType) => record.progress === value,
-            render: (status: string) => (
-                <Select defaultValue={status} style={{ width: 120 }}>
-                    <Select.Option value="New">New</Select.Option>
-                    <Select.Option value="In Progress">In Progress</Select.Option>
-                    <Select.Option value="Resolved">Resolved</Select.Option>
+            render: (status: string, record: IssueType) => (
+                <Select defaultValue={status} style={{ width: 120 }} onChange={(value) => set_progress(record.key, value as ProgressTypeEnum)}>
+                    <Select.Option value={ProgressTypeEnum.New}>New</Select.Option>
+                    <Select.Option value={ProgressTypeEnum.InProgress}>In Progress</Select.Option>
+                    <Select.Option value={ProgressTypeEnum.Resolved}>Resolved</Select.Option>
+                    <Select.Option value={ProgressTypeEnum.Closed}>Closed</Select.Option>
                 </Select>
+            )
+        },
+        {
+            key: 'outage_date',
+            title: 'Outage date',
+            dataIndex: 'outage_date',
+            filters: issues.map(item => ({ text: item.outage_date.format('YYYY/MM/DD'), value: item.outage_date.format('YYYY/MM/DD') })).filter(
+                (item, index, self) => index === self.findIndex((t) => t.value === item.value)
+            ),
+            filterSearch: true,
+            onFilter: (value: any, record: IssueType) => record.outage_date.format('YYYY/MM/DD').includes(value),
+            defaultSortOrder: 'descend',
+            sorter: (a: IssueType, b: IssueType) => a.outage_date.diff(b.outage_date),
+            render: (outage_date: Dayjs) => (
+                <>
+                    <p>{outage_date.format('YYYY/MM/DD')}</p>
+                </>
             )
         },
         {
             key: 'ticket_id',
             title: 'Ticket ID',
             dataIndex: 'ticket_id',
-            filters: issues.map(item => ({ text: item.ticket_id, value: item.ticket_id })),
+            filters: issues.map(item => ({ text: item.ticket_id, value: item.ticket_id })).filter(
+                (item, index, self) => index === self.findIndex((t) => t.value === item.value)
+            ),
             filterSearch: true,
             onFilter: (value: any, record: IssueType) => record.ticket_id.includes(value),
         },
@@ -41,7 +78,9 @@ export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssue
             key: 'title',
             title: 'Title',
             dataIndex: 'title',
-            filters: issues.map(item => ({ text: item.title, value: item.title })),
+            filters: issues.map(item => ({ text: item.title, value: item.title })).filter(
+                (item, index, self) => index === self.findIndex((t) => t.value === item.value)
+            ),
             filterSearch: true,
             onFilter: (value: any, record: IssueType) => record.title.includes(value),
         },
@@ -49,13 +88,17 @@ export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssue
             key: 'system_tags',
             title: 'Systems',
             dataIndex: 'system_tags',
-            filters: Array.from(new Set(issues.map(item => item.system_tags.map(tag => ({ text: tag, value: tag }))).flat())),
+            filters: issues.map(item => item.system_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
+                (item, index, self) => index === self.findIndex((t) => t.value === item.value)
+            ),
             filterSearch: true,
             onFilter: (value: any, record: IssueType) => record.system_tags.includes(value),
             render: (tags: string[]) => (
                 <>
                     {tags.map(tag => {
-                        let color = tag.length > 5 ? 'geekblue' : 'green'
+                        const color = tag.length > 7 ? 'geekblue' : 
+                                      tag.length > 5 ? 'green' :
+                                      tag.length > 3 ? 'orange' : 'red'
                         return (
                             <Tag color={color} key={tag}>
                                 {tag.toUpperCase()}
@@ -69,13 +112,17 @@ export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssue
             key: 'error_source_tags',
             title: 'Error Source',
             dataIndex: 'error_source_tags',
-            filters: Array.from(new Set(issues.map(item => item.error_source_tags.map(tag => ({ text: tag, value: tag }))).flat())),
+            filters: issues.map(item => item.error_source_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
+                (item, index, self) => index === self.findIndex((t) => t.value === item.value)
+            ),
             filterSearch: true,
-            onFilter: (value: any, record: IssueType) => record.system_tags.includes(value),
+            onFilter: (value: any, record: IssueType) => record.error_source_tags.includes(value),
             render: (tags: string[]) => (
                 <>
                     {tags.map(tag => {
-                        let color = tag.length > 5 ? 'geekblue' : 'green'
+                        const color = tag.length > 7 ? 'geekblue' : 
+                                      tag.length > 5 ? 'green' :
+                                      tag.length > 3 ? 'orange' : 'red'
                         return (
                             <Tag color={color} key={tag}>
                                 {tag.toUpperCase()}
@@ -89,13 +136,17 @@ export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssue
             key: 'error_category_tags',
             title: 'Error Category',
             dataIndex: 'error_category_tags',
-            filters: Array.from(new Set(issues.map(item => item.error_category_tags.map(tag => ({ text: tag, value: tag }))).flat())),
+            filters: issues.map(item => item.error_category_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
+                (item, index, self) => index === self.findIndex((t) => t.value === item.value)
+            ),
             filterSearch: true,
-            onFilter: (value: any, record: IssueType) => record.system_tags.includes(value),
+            onFilter: (value: any, record: IssueType) => record.error_category_tags.includes(value),
             render: (tags: string[]) => (
                 <>
                     {tags.map(tag => {
-                        let color = tag.length > 5 ? 'geekblue' : 'green'
+                        const color = tag.length > 7 ? 'geekblue' : 
+                                      tag.length > 5 ? 'green' :
+                                      tag.length > 3 ? 'orange' : 'red'
                         return (
                             <Tag color={color} key={tag}>
                                 {tag.toUpperCase()}
@@ -106,19 +157,23 @@ export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssue
             )
         },
         {
-            key: 'title',
+            key: 'priority',
             title: 'Priority',
             dataIndex: 'priority',
-            filters: issues.map(item => ({ text: item.title, value: item.title })),
+            filters: [
+                { text: PriorityTypeEnum.High, value: PriorityTypeEnum.High },
+                { text: PriorityTypeEnum.Middle, value: PriorityTypeEnum.Middle },
+                { text: PriorityTypeEnum.Low, value: PriorityTypeEnum.Low },
+            ],
             filterSearch: true,
-            onFilter: (value: any, record: IssueType) => record.title.includes(value),
+            onFilter: (value: any, record: IssueType) => record.priority.includes(value),
         },
         {
             key: 'elapsed_days',
             title: 'Elapsed days',
             dataIndex: 'elapsed_days',
-            filters: [{ text: 'abandoned', value: 'abandoned' }],
-            onFilter: (value: any, record: IssueType) => value === 'abandoned' ? record.elapsed_days >= 30 : false,
+            defaultSortOrder: 'descend',
+            sorter: (a: IssueType, b: IssueType) => a.elapsed_days - b.elapsed_days,
             render: (elapsed_days: number) => (
                 elapsed_days >= 30 ? <p style={{color: 'red'}}>{elapsed_days}</p> : <p style={{color: 'black'}}>{elapsed_days}</p>
             )
@@ -127,8 +182,8 @@ export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssue
             key: 'remaining_days',
             title: 'Remaining days',
             dataIndex: 'remaining_days',
-            filters: [{ text: 'overdue', value: 'overdue' }, { text: 'close deadlines', value: 'close deadlines' }],
-            onFilter: (value: any, record: IssueType) => value === 'overdue' ? record.remaining_days < 0 :  value === 'close deadlines' ? record.remaining_days > 0 && record.remaining_days < 7 : false,
+            defaultSortOrder: 'descend',
+            sorter: (a: IssueType, b: IssueType) => a.remaining_days - b.remaining_days,
             render: (remaining_days: number) => (
                 remaining_days < 0 ? <p style={{color: 'red'}}>{remaining_days}</p> : <p style={{color: 'black'}}>{remaining_days}</p>
             )
@@ -153,8 +208,8 @@ export const IssuesPage: React.FC<{issues: IssueType[], deleteIssue: deleteIssue
                     <h1>Issues</h1>
                 </Col>
                 <Col span={12} style={{ textAlign: 'right' }}>
-                    <Button type='primary' icon={<PlusSquareOutlined/>}>
-                        <Link to={"/issues/create"}>Create new Issue </Link>
+                    <Button type='primary' icon={<PlusSquareOutlined/>} onClick={handleAddEmptyIssue} >
+                        Create new Issue
                     </Button>
                 </Col>
             </Row>
