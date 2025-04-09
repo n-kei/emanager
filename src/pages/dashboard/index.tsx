@@ -14,11 +14,11 @@ export const DashboardPage: React.FC<{issues: IssueType[]}> = ({issues}) => {
     const abandoned_tasks = issues.filter(issue => issue.progress === ProgressTypeEnum.New && issue.elapsed_days >= 7).length;
 
     const [start_date, set_start_date] = React.useState<Dayjs>(dayjs().add(-7, 'day'));
-    const [end_date, set_end_date] = React.useState<Dayjs>(dayjs());
+    const [end_date, set_end_date] = React.useState<Dayjs>(dayjs().add(7, 'day'));
     const handleDateChange = (dates: any) => {
         if (dates) {
             set_start_date(dates[0]);
-            set_end_date(dates[1]);
+        set_end_date(dates[1]);
         }
     };
 
