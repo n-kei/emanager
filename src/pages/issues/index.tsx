@@ -10,7 +10,7 @@ import { Popover } from 'antd';
 import { render } from "@testing-library/react";
 import { addEmptyIssueType, deleteIssueType, editIssueType, IssueType, ProgressTypeEnum, PriorityTypeEnum } from "../../types";
 import { TableColumnsType } from "antd";
-import { Dayjs } from 'dayjs';
+import dayjs, { Dayjs } from 'dayjs';
 
 export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyIssueType, deleteIssue: deleteIssueType, editIssue: editIssueType}> = ({issues, addEmptyIssue, deleteIssue, editIssue}) => {
     const navigate = useNavigate();
@@ -23,7 +23,11 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
 
     const set_progress = (key: string, value: ProgressTypeEnum) => {
         const issue = issues.filter(issue => issue.key === key)[0];
-        editIssue(key, {...issue, progress: value});
+        if(value === ProgressTypeEnum.Closed) {
+            editIssue(key, {...issue, progress: value, closed_date: dayjs()});
+        } else {
+            editIssue(key, {...issue, progress: value, closed_date: null});
+        }
     }
 
     const columns: TableColumnsType<IssueType> = [
@@ -172,20 +176,20 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             key: 'elapsed_days',
             title: 'Elapsed days',
             dataIndex: 'elapsed_days',
-            defaultSortOrder: 'descend',
             sorter: (a: IssueType, b: IssueType) => a.elapsed_days - b.elapsed_days,
-            render: (elapsed_days: number) => (
-                elapsed_days >= 30 ? <p style={{color: 'red'}}>{elapsed_days}</p> : <p style={{color: 'black'}}>{elapsed_days}</p>
+            render: (elapsed_days: number, record: IssueType) => (
+                record.progress === ProgressTypeEnum.New && elapsed_days >= 7 ? <p style={{color: 'gold'}}>{elapsed_days}</p> : <p style={{color: 'black'}}>{elapsed_days}</p>
             )
         },
         {
             key: 'remaining_days',
             title: 'Remaining days',
             dataIndex: 'remaining_days',
-            defaultSortOrder: 'descend',
             sorter: (a: IssueType, b: IssueType) => a.remaining_days - b.remaining_days,
             render: (remaining_days: number) => (
-                remaining_days < 0 ? <p style={{color: 'red'}}>{remaining_days}</p> : <p style={{color: 'black'}}>{remaining_days}</p>
+                remaining_days <= 0 ? <p style={{color: 'red'}}>{remaining_days}</p> : 
+                remaining_days < 7 ? <p style={{color: 'orange'}}>{remaining_days}</p> :
+                <p style={{color: 'black'}}>{remaining_days}</p>
             )
         },
         {

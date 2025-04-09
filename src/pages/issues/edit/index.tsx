@@ -49,7 +49,6 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
     const set_solution = (value: string) => {
         editIssue(params.id as string, {...issue, solution: value});
     }
-
     const set_ticket_id = (value: string) => {
         editIssue(params.id as string, {...issue, ticket_id: value});
     }
@@ -60,13 +59,17 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
         editIssue(params.id as string, {...issue, outage_date: value, elapsed_days: dayjs().diff(value, 'day')});
     }
     const set_due_date = (value: Dayjs) => {
-        editIssue(params.id as string, {...issue, due_date: value, remaining_days: value.diff(dayjs(), 'day')});
+        editIssue(params.id as string, {...issue, due_date: value, remaining_days: value.diff(dayjs(), 'day') + 1});
     }
     const add_comment = (value: string) => {
         editIssue(params.id as string, {...issue, comments: [...issue.comments, {date: dayjs(), comment: value}]});
     }
     const set_progress = (value: ProgressTypeEnum) => {
-        editIssue(params.id as string, {...issue, progress: value});
+        if (value === ProgressTypeEnum.Closed) {
+            editIssue(params.id as string, {...issue, progress: value, closed_date: dayjs()});
+        } else {
+            editIssue(params.id as string, {...issue, progress: value, closed_date: null});
+        }
     }
     const set_priority = (value: PriorityTypeEnum) => {
         editIssue(params.id as string, {...issue, priority: value});
@@ -151,13 +154,25 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
         },
         {
             key: '3',
-            label: 'Elapsed days',
-            children: issue.elapsed_days
+            label: 'Creation Date',
+            children: issue.creation_date.format('YYYY-MM-DD')
         },
         {
             key: '4',
+            label: 'Closed Date',
+            children: issue.closed_date ? issue.closed_date.format('YYYY-MM-DD') : 'Not closed yet'
+        },
+        {
+            key: '5',
+            label: 'Elapsed days',
+            children: issue.progress === ProgressTypeEnum.New && issue.elapsed_days >= 7 ? <div style={{color: 'gold'}}>{issue.elapsed_days}</div> : <div style={{color: 'black'}}>{issue.elapsed_days}</div>
+        },
+        {
+            key: '6',
             label: 'Remaining days',
-            children: issue.remaining_days
+            children: issue.remaining_days <= 0 ? <div style={{color: 'red'}}>{issue.remaining_days}</div> : 
+                issue.remaining_days < 7 ? <div style={{color: 'orange'}}>{issue.remaining_days}</div> :
+                <div style={{color: 'black'}}>{issue.remaining_days}</div>
         }
     ]
 
@@ -172,13 +187,13 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
                     </Typography.Title>
                     <Button variant='outlined' icon={<MenuFoldOutlined/>} onClick={() => {setOpen(true)}}/>
                     <Drawer onClose={() => {setOpen(false)}} open={open}>
+                        <Descriptions column={1} items={status}/>
+                        <Divider style={{borderColor: 'lightgray'}}/>
                         <Descriptions column={1} items={days}/>
                         <Divider style={{borderColor: 'lightgray'}}/>
                         <Descriptions column={1} items={tags}/>
                         <Divider style={{borderColor: 'lightgray'}}/>
                         <Descriptions column={1} items={sa_informations}/>
-                        <Divider style={{borderColor: 'lightgray'}}/>
-                        <Descriptions column={1} items={status}/>
                     </Drawer>
                 </Space>
             </Row>

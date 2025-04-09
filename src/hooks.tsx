@@ -22,8 +22,6 @@ const readExcelFile = (file: File): Promise<IssueType[]> => {
 };
 
 const refineExcelData = (data: any[]): IssueType[] => { 
-  // TODO: remaining_daysの計算を追加する
-  // TODO: elapsed_daysの計算を追加する
   return data.map((item) => ({
     key: item.Key,
     title: item.Title,
@@ -45,7 +43,9 @@ const refineExcelData = (data: any[]): IssueType[] => {
     ticket_link: item['Ticket link'],
     due_date: dayjs(item['Due date']),
     elapsed_days: dayjs().diff(dayjs(item['Outage date']), 'day'),
-    remaining_days: dayjs(item['Due date']).diff(dayjs(), 'day'),
+    remaining_days: dayjs(item['Due date']).diff(dayjs(), 'day') + 1,
+    creation_date: dayjs(item['Creation date']),
+    closed_date: item['Closed date'] === "Not closed yet" ? null : dayjs(item['Closed date']),
   }));
 }
 
@@ -78,6 +78,8 @@ export const useIssues = () => {
       due_date: dayjs(),
       elapsed_days: 0,
       remaining_days: 0,
+      creation_date: dayjs(),
+      closed_date: null
     };
     setIssues([...issues, newIssue]);
 
@@ -110,7 +112,6 @@ export const useIssues = () => {
     const error_category_tags = Array.from(new Set(issues.flatMap(issue => issue.error_category_tags).map(tag => "error_category:" + tag)));
 
     const data = [
-      //TODO: Interfaceのkey定義と内容を同期させる
       ...issues.map(issue => ({
           "Key": issue.key,
           "Title": issue.title,
@@ -127,6 +128,8 @@ export const useIssues = () => {
           "Due date": issue.due_date.format('YYYY/MM/DD'),
           "Elapsed days": issue.elapsed_days,
           "Remaining days": issue.remaining_days,
+          "Creation date": issue.creation_date.format('YYYY/MM/DD'),
+          "Closed date": issue.closed_date === null ? "Not closed yet" : issue.closed_date.format('YYYY/MM/DD'),
           ...system_tags.map(tag => ({[tag]: issue.system_tags.includes(tag.replace("system:", "")) ? "O" : ""})).reduce((acc, curr) => ({ ...acc, ...curr }), {}),  
           ...error_source_tags.map(tag => ({[tag]: issue.error_source_tags.includes(tag.replace("error_source:", "")) ? "O" : ""})).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
           ...error_category_tags.map(tag => ({[tag]: issue.error_category_tags.includes(tag.replace("error_category:", "")) ? "O" : ""})).reduce((acc, curr) => ({ ...acc, ...curr }), {}),
@@ -137,7 +140,7 @@ export const useIssues = () => {
     const wb = XLSX.utils.book_new();
     const ws = XLSX.utils.json_to_sheet(data);
     XLSX.utils.book_append_sheet(wb, ws, 'issues');
-    XLSX.writeFile(wb, 'download.xlsx');
+    XLSX.writeFile(wb, `emanager_${dayjs().format('YYYYMMDDHHmmss')}.xlsx`);
   }
 
   return [issues, {addIssue, addEmptyIssue, editIssue, deleteIssue, newIssues, loadIssues, saveIssues}] as const;

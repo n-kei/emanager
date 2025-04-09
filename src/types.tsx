@@ -34,6 +34,8 @@ export interface IssueType {
     due_date: Dayjs
     elapsed_days: number
     remaining_days: number
+    creation_date: Dayjs
+    closed_date: Dayjs | null
 }
 
 export type addIssueType = (Issue: IssueType) => void
