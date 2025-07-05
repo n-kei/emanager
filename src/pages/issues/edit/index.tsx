@@ -1,78 +1,42 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import {Space, Row, Col, Divider, Select} from 'antd';
-import {Tag} from 'antd';
+import {Space, Row, Divider, Select} from 'antd';
 import { DatePicker } from "antd";
 import {Input} from "antd";
 import dayjs, { Dayjs } from 'dayjs';
 import { EmanagerTag } from "../../../components/tag";
 import {Drawer} from 'antd';
 
-import { Timeline } from 'antd';
 import { MenuFoldOutlined, PlusSquareOutlined } from '@ant-design/icons';
 import { Button } from 'antd';
 import { Typography } from 'antd';
 import { Descriptions, DescriptionsProps } from 'antd';
 import { Card } from 'antd';
-import { addEmptyIssueType, editIssueType, IssueType, PriorityTypeEnum, ProgressTypeEnum } from "../../../types";
+import { IssuesHookType } from "../../../types";
+import { ProgressTypeEnum, PriorityTypeEnum } from "../../../types";
 
 const { Title, Paragraph, Link } = Typography;
 
-export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueType}> = ({issues, editIssue}) => {
+export const EditIssuePage: React.FC<IssuesHookType> = (issues) => {
     const params = useParams();
 
-    const issue = issues.filter(issue => issue.key === params.id)[0];
+    const issue = issues.issues.filter(issue => issue.key === params.id)[0];
     const [new_comment, set_new_comment] = React.useState<string>('');
 
-    const set_system_tags = (tags: string[]) => {
-        editIssue(params.id as string, {...issue, system_tags: tags});
-    }
-    const set_error_source_tags = (tags: string[]) => {
-        editIssue(params.id as string, {...issue, error_source_tags: tags});
-    }
-    const set_error_category_tags = (tags: string[]) => {
-        editIssue(params.id as string, {...issue, error_category_tags: tags});
+    //TODO: Duplicated Code
+    const set_issue_attr = (attr: string, value: any) => {
+        issues.editIssue(params.id as string, {...issue, [attr]: value});
     }
 
-    const set_title = (value: string) => {
-        editIssue(params.id as string, {...issue, title: value});
-    }
-    const set_abstract = (value: string) => {
-        editIssue(params.id as string, {...issue, abstract: value});
-    }
-    const set_statement = (value: string) => {
-        editIssue(params.id as string, {...issue, statement: value});
-    }
-    const set_workaround = (value: string) => {
-        editIssue(params.id as string, {...issue, workaround: value});
-    }
-    const set_solution = (value: string) => {
-        editIssue(params.id as string, {...issue, solution: value});
-    }
-    const set_ticket_id = (value: string) => {
-        editIssue(params.id as string, {...issue, ticket_id: value});
-    }
-    const set_ticket_link = (value: string) => {
-        editIssue(params.id as string, {...issue, ticket_link: value});
-    }
-    const set_outage_date = (value: Dayjs) => {
-        editIssue(params.id as string, {...issue, outage_date: value, elapsed_days: dayjs().diff(value, 'day')});
-    }
-    const set_due_date = (value: Dayjs) => {
-        editIssue(params.id as string, {...issue, due_date: value, remaining_days: value.diff(dayjs(), 'day') + 1});
-    }
     const add_comment = (value: string) => {
-        editIssue(params.id as string, {...issue, comments: [...issue.comments, {date: dayjs(), comment: value}]});
+        issues.editIssue(params.id as string, {...issue, comments: [...issue.comments, {date: dayjs(), comment: value}]});
     }
     const set_progress = (value: ProgressTypeEnum) => {
         if (value === ProgressTypeEnum.Closed) {
-            editIssue(params.id as string, {...issue, progress: value, closed_date: dayjs()});
+            issues.editIssue(params.id as string, {...issue, progress: value, closed_date: dayjs()});
         } else {
-            editIssue(params.id as string, {...issue, progress: value, closed_date: null});
+            issues.editIssue(params.id as string, {...issue, progress: value, closed_date: null});
         }
-    }
-    const set_priority = (value: PriorityTypeEnum) => {
-        editIssue(params.id as string, {...issue, priority: value});
     }
 
     const {TextArea} = Input;
@@ -105,7 +69,7 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
                             {label: PriorityTypeEnum.Middle.toString(), value: PriorityTypeEnum.Middle},
                             {label: PriorityTypeEnum.Low.toString(), value: PriorityTypeEnum.Low},
                         ]}
-                        onChange={set_priority}
+                        onChange={(priority: PriorityTypeEnum) => set_issue_attr("priority", priority)}
                         style={{ width: 120 }}
                     />
         }
@@ -114,30 +78,32 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
         {
             key: '1',
             label: 'Systems',
-            children: <EmanagerTag tags={issue.system_tags} setTags={set_system_tags}/>
+            children: <EmanagerTag tags={issue.system_tags} setTags={(tags: string[]) => set_issue_attr("system_tags", tags)}/>
         },
+        // TODO: Shotgun Surgery
         {
             key: '2',
             label: 'Error Source',
-            children: <EmanagerTag tags={issue.error_source_tags} setTags={set_error_source_tags}/>
+            children: <EmanagerTag tags={issue.error_source_tags} setTags={(tags: string[]) => set_issue_attr("error_source_tags", tags)}/>
         },
+        // TODO: Shotgun Surgery
         {
             key: '3',
             label: 'Error Category',
-            children: <EmanagerTag tags={issue.error_category_tags} setTags={set_error_category_tags}/>
+            children: <EmanagerTag tags={issue.error_category_tags} setTags={(tags: string[]) => set_issue_attr("error_category_tags", tags)}/>
         }
     ]
     const sa_informations: DescriptionsProps['items'] = [
         {
             key: '1',
             label: 'Ticket ID',
-            children: <Paragraph editable={{ onChange: set_ticket_id }}>{issue.ticket_id}</Paragraph>
+            children: <Paragraph editable={{ onChange: (ticket_id: string) => set_issue_attr("ticket_id", ticket_id)}}>{issue.ticket_id}</Paragraph>
         },
         {
             key: '2',
             label: 'Link',
             children: <Link href={issue.ticket_link.toString()} target="_blank">
-                <Paragraph editable={{ onChange: set_ticket_link }}>{issue.ticket_link}</Paragraph>
+                <Paragraph editable={{ onChange: (ticket_link: string) => set_issue_attr("ticket_link", ticket_link) }}>{issue.ticket_link}</Paragraph>
             </Link>
         }
     ]
@@ -145,12 +111,12 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
         {
             key: '1',
             label: 'Outage Date',
-            children: <DatePicker onChange={set_outage_date} defaultValue={issue.outage_date} />
+            children: <DatePicker onChange={(outage_date: Dayjs) => set_issue_attr("outage_date", outage_date)} defaultValue={issue.outage_date} />
         },
         {
             key: '2',
             label: 'Due Date',
-            children: <DatePicker onChange={set_due_date} defaultValue={issue.due_date} />
+            children: <DatePicker onChange={(due_date: Dayjs) => set_issue_attr("due_date", due_date)} defaultValue={issue.due_date} />
         },
         {
             key: '3',
@@ -182,7 +148,7 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
         <div>
             <Row style={{ marginBottom: 24 }}>
                 <Space direction="horizontal" style={{ justifyContent: 'space-between', width: '100%' }}>
-                    <Typography.Title editable={{ onChange: set_title }} level={1} style={{ marginBottom: 12 }}>
+                    <Typography.Title editable={{ onChange: (title: string) => set_issue_attr("title", title) }} level={1} style={{ marginBottom: 12 }}>
                         {issue.title}
                     </Typography.Title>
                     <Button variant='outlined' icon={<MenuFoldOutlined/>} onClick={() => {setOpen(true)}}/>
@@ -200,7 +166,7 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
             <Row style={{ marginBottom: 24 }}>
                 <Typography>
                     <Title level={2}>Abstract</Title>
-                    <Paragraph editable={{ onChange: set_abstract }}>
+                    <Paragraph editable={{ onChange: (abstract: string) => set_issue_attr("abstract", abstract) }}>
                         {issue.abstract}
                     </Paragraph>
                 </Typography>
@@ -208,7 +174,7 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
             <Row style={{ marginBottom: 24 }}>
                 <Typography>
                     <Title level={2}>Statement</Title>
-                    <Paragraph editable={{ onChange: set_statement }}>
+                    <Paragraph editable={{ onChange: (statement: string) => set_issue_attr("statement", statement) }}>
                         {issue.statement}
                     </Paragraph>
                 </Typography>
@@ -216,7 +182,7 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
             <Row style={{ marginBottom: 24 }}>
                 <Typography>
                     <Title level={2}>Workaround</Title>
-                    <Paragraph editable={{ onChange: set_workaround }}>
+                    <Paragraph editable={{ onChange: (workaround: string) => set_issue_attr("workaround", workaround) }}>
                         {issue.workaround}
                     </Paragraph>
                 </Typography>
@@ -224,7 +190,7 @@ export const EditIssuePage: React.FC<{issues: IssueType[], editIssue: editIssueT
             <Row style={{ marginBottom: 24 }}>
                 <Typography>
                     <Title level={2}>Solution</Title>
-                    <Paragraph editable={{ onChange: set_solution }}>
+                    <Paragraph editable={{ onChange: (solution: string) => set_issue_attr("solution", solution) }}>
                         {issue.solution}
                     </Paragraph>
                 </Typography>

@@ -1,32 +1,30 @@
 import React from "react";
 import { EyeOutlined, DeleteOutlined, PlusSquareOutlined, CloseCircleFilled, CheckCircleFilled } from '@ant-design/icons';
-import { Button, Progress } from 'antd';
+import { Button } from 'antd';
 import { Select } from 'antd';
 import { Space, Table, Tag} from 'antd'
 import { Row, Col } from 'antd';
-import type { TableProps } from "antd";
-import { Link, useNavigate } from 'react-router-dom';
-import { Popover } from 'antd';
-import { render } from "@testing-library/react";
-import { addEmptyIssueType, deleteIssueType, editIssueType, IssueType, ProgressTypeEnum, PriorityTypeEnum } from "../../types";
+import { useNavigate } from 'react-router-dom';
+import {  IssueType, ProgressTypeEnum, PriorityTypeEnum, IssuesHookType } from "../../types";
 import { TableColumnsType } from "antd";
 import dayjs, { Dayjs } from 'dayjs';
 
-export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyIssueType, deleteIssue: deleteIssueType, editIssue: editIssueType}> = ({issues, addEmptyIssue, deleteIssue, editIssue}) => {
+export const IssuesPage: React.FC<IssuesHookType> = (issues) => {
     const navigate = useNavigate();
 
     const handleAddEmptyIssue = () => {
-        const key = addEmptyIssue();
+        const key = issues.addEmptyIssue();
         console.log(key);
         navigate('/issues/edit/' + key);
     }
 
+    // TODO: Duplicated Code
     const set_progress = (key: string, value: ProgressTypeEnum) => {
-        const issue = issues.filter(issue => issue.key === key)[0];
+        const issue = issues.issues.filter(issue => issue.key === key)[0];
         if(value === ProgressTypeEnum.Closed) {
-            editIssue(key, {...issue, progress: value, closed_date: dayjs()});
+            issues.editIssue(key, {...issue, progress: value, closed_date: dayjs()});
         } else {
-            editIssue(key, {...issue, progress: value, closed_date: null});
+            issues.editIssue(key, {...issue, progress: value, closed_date: null});
         }
     }
 
@@ -55,7 +53,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             key: 'outage_date',
             title: 'Outage date',
             dataIndex: 'outage_date',
-            filters: issues.map(item => ({ text: item.outage_date.format('YYYY/MM/DD'), value: item.outage_date.format('YYYY/MM/DD') })).filter(
+            filters: issues.issues.map(item => ({ text: item.outage_date.format('YYYY/MM/DD'), value: item.outage_date.format('YYYY/MM/DD') })).filter(
                 (item, index, self) => index === self.findIndex((t) => t.value === item.value)
             ),
             filterSearch: true,
@@ -72,7 +70,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             key: 'ticket_id',
             title: 'Ticket ID',
             dataIndex: 'ticket_id',
-            filters: issues.map(item => ({ text: item.ticket_id, value: item.ticket_id })).filter(
+            filters: issues.issues.map(item => ({ text: item.ticket_id, value: item.ticket_id })).filter(
                 (item, index, self) => index === self.findIndex((t) => t.value === item.value)
             ),
             filterSearch: true,
@@ -82,7 +80,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             key: 'title',
             title: 'Title',
             dataIndex: 'title',
-            filters: issues.map(item => ({ text: item.title, value: item.title })).filter(
+            filters: issues.issues.map(item => ({ text: item.title, value: item.title })).filter(
                 (item, index, self) => index === self.findIndex((t) => t.value === item.value)
             ),
             filterSearch: true,
@@ -92,7 +90,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             key: 'system_tags',
             title: 'Systems',
             dataIndex: 'system_tags',
-            filters: issues.map(item => item.system_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
+            filters: issues.issues.map(item => item.system_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
                 (item, index, self) => index === self.findIndex((t) => t.value === item.value)
             ),
             filterSearch: true,
@@ -116,7 +114,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             key: 'error_source_tags',
             title: 'Error Source',
             dataIndex: 'error_source_tags',
-            filters: issues.map(item => item.error_source_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
+            filters: issues.issues.map(item => item.error_source_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
                 (item, index, self) => index === self.findIndex((t) => t.value === item.value)
             ),
             filterSearch: true,
@@ -140,7 +138,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             key: 'error_category_tags',
             title: 'Error Category',
             dataIndex: 'error_category_tags',
-            filters: issues.map(item => item.error_category_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
+            filters: issues.issues.map(item => item.error_category_tags.map(tag => ({ text: tag, value: tag }))).flat().filter(
                 (item, index, self) => index === self.findIndex((t) => t.value === item.value)
             ),
             filterSearch: true,
@@ -200,7 +198,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             render: (text:String, record: IssueType, index:Number) => (
                 <Space size="middle">
                     <Button type='text' icon={<EyeOutlined/>} onClick={() => navigate('/issues/edit/' + record.key)}/>
-                    <Button type='text' icon={<DeleteOutlined onClick={() => deleteIssue(record.key)} />}/>
+                    <Button type='text' icon={<DeleteOutlined onClick={() => issues.deleteIssue(record.key)} />}/>
                 </Space>
             )
         }
@@ -219,7 +217,7 @@ export const IssuesPage: React.FC<{issues: IssueType[], addEmptyIssue: addEmptyI
             </Row>
             <Table<IssueType> 
                 columns={columns} 
-                dataSource={issues} 
+                dataSource={issues.issues} 
                 scroll={{ x: 'max-content', y: 'max-content' }}
             />
         </div>

@@ -45,3 +45,14 @@ export type deleteIssueType = (key: string) => void
 export type newIssuesType = () => void
 export type saveIssuesType = () => void
 export type loadIssuesType = (info: UploadChangeParam) => void
+
+export interface IssuesHookType {
+    issues: IssueType[]
+    addIssue: addIssueType
+    addEmptyIssue: addEmptyIssueType
+    editIssue: editIssueType
+    deleteIssue: deleteIssueType
+    newIssues: newIssuesType
+    loadIssues: loadIssuesType
+    saveIssues: saveIssuesType
+}

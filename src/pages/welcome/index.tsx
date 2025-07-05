@@ -1,10 +1,10 @@
 import React from "react"
-import { Button, Descriptions, Row, Space, Typography, Upload } from "antd"
-import { loadIssuesType, newIssuesType } from "../../types"
+import { Button, Row, Space, Typography, Upload } from "antd"
+import { IssuesHookType } from "../../types"
 import { useNavigate } from "react-router-dom"
 import { UploadChangeParam } from "antd/es/upload"
 
-export const WelcomePage: React.FC<{loadIssues: loadIssuesType, newIssues: newIssuesType}> = ({loadIssues, newIssues}) => {
+export const WelcomePage: React.FC<IssuesHookType> = (issues) => {
     const navigate = useNavigate()
     return(
         <div>
@@ -16,8 +16,8 @@ export const WelcomePage: React.FC<{loadIssues: loadIssuesType, newIssues: newIs
                     <Typography.Title  level={4} style={{ marginBottom: 12 }}>
                         Start
                     </Typography.Title>
-                    <Button color="primary" variant="text" onClick={() => {newIssues();navigate('/dashboard')}}>New project</Button>
-                    <Upload accept=".xlsx, .xls" onChange={(info: UploadChangeParam) => {loadIssues(info); navigate('/dashboard')}} showUploadList={false}>
+                    <Button color="primary" variant="text" onClick={() => {issues.newIssues();navigate('/dashboard')}}>New project</Button>
+                    <Upload accept=".xlsx, .xls" onChange={(info: UploadChangeParam) => {issues.loadIssues(info); navigate('/dashboard')}} showUploadList={false}>
                         <Button color="primary" variant="text">Open project</Button>
                     </Upload>
                 </Space>

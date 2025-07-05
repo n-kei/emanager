@@ -4,6 +4,7 @@ import { addIssueType, editIssueType } from './types';
 import dayjs from 'dayjs';
 import * as XLSX from 'xlsx';
 import { UploadChangeParam } from 'antd/es/upload';
+import { IssuesHookType } from './types';
 
 const readExcelFile = (file: File): Promise<IssueType[]> => {
   return new Promise((resolve, reject) => {
@@ -21,6 +22,7 @@ const readExcelFile = (file: File): Promise<IssueType[]> => {
   });
 };
 
+// TODO: Mysterious Name
 const refineExcelData = (data: any[]): IssueType[] => { 
   return data.map((item) => ({
     key: item.Key,
@@ -49,7 +51,7 @@ const refineExcelData = (data: any[]): IssueType[] => {
   }));
 }
 
-export const useIssues = () => {
+export const useIssues = (): IssuesHookType => {
   const [issues, setIssues] = useState<IssueType[]>([]);
 
   const addIssue: addIssueType = (Issue: IssueType) => {
@@ -111,6 +113,8 @@ export const useIssues = () => {
     const error_source_tags = Array.from(new Set(issues.flatMap(issue => issue.error_source_tags).map(tag => "error_source:" + tag)));
     const error_category_tags = Array.from(new Set(issues.flatMap(issue => issue.error_category_tags).map(tag => "error_category:" + tag)));
 
+    // TODO: Primitive Obsession
+    // TODO: Data Clumps
     const data = [
       ...issues.map(issue => ({
           "Key": issue.key,
@@ -143,6 +147,6 @@ export const useIssues = () => {
     XLSX.writeFile(wb, `emanager_${dayjs().format('YYYYMMDDHHmmss')}.xlsx`);
   }
 
-  return [issues, {addIssue, addEmptyIssue, editIssue, deleteIssue, newIssues, loadIssues, saveIssues}] as const;
+  return {issues, addIssue, addEmptyIssue, editIssue, deleteIssue, newIssues, loadIssues, saveIssues} as IssuesHookType;
 
 }
