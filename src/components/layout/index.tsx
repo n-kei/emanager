@@ -1,6 +1,6 @@
 'use client'
 import React from 'react';
-import { HomeFilled, BugFilled, SaveFilled, ImportOutlined, WarningFilled, CheckSquareFilled } from '@ant-design/icons';
+import { HomeFilled, BugFilled, SaveFilled, ImportOutlined, WarningFilled, CheckSquareFilled, ReadOutlined } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd'
 import {Space} from 'antd'
 import { Outlet } from 'react-router-dom';
@@ -9,11 +9,11 @@ import { Upload } from 'antd';
 import { UploadChangeParam } from 'antd/es/upload';
 import { useNavigate } from 'react-router-dom';
 import {Drawer} from 'antd'
-import { IssuesHookType } from '../../types';
+import { SheetsHookType } from '../../types';
 
 const { Header, Content,  Sider } = Layout
 
-export const CommonLayout: React.FC<IssuesHookType> = (issues) => {
+export const CommonLayout: React.FC<SheetsHookType> = (sheets) => {
   const navigate = useNavigate()
   const {
     token: { colorBgContainer, borderRadiusLG },
@@ -37,6 +37,9 @@ export const CommonLayout: React.FC<IssuesHookType> = (issues) => {
           <Menu.Item key="/dashboard" icon={<HomeFilled />}>
             <Link to="/dashboard">Dashboard</Link>
           </Menu.Item>
+          <Menu.Item key="/specs" icon={<ReadOutlined />}>
+            <Link to="/specs">Specs</Link>
+          </Menu.Item>
           <Menu.Item key="/issues" icon={<BugFilled />}>
             <Link to="/issues">Issues</Link>
           </Menu.Item>
@@ -46,10 +49,10 @@ export const CommonLayout: React.FC<IssuesHookType> = (issues) => {
         <Header style={{ height: 65, margin: '0vh 1vh 0vh', padding: '0 24px', background: colorBgContainer }}>
           <Space direction="horizontal" style={{ justifyContent: 'space-between', width: '100%' }}>
             <Space direction="horizontal">
-              <Upload accept=".xlsx, .xls" onChange={(info: UploadChangeParam) => {issues.loadIssues(info); navigate('/dashboard')}} showUploadList={false}>
+              <Upload accept=".xlsx, .xls" onChange={(info: UploadChangeParam) => {sheets.loadSheets(info); navigate('/dashboard')}} showUploadList={false}>
                 <Button icon={<ImportOutlined/>}/>
               </Upload>
-              <Button icon={<SaveFilled/>} onClick={issues.saveIssues}/>
+              <Button icon={<SaveFilled/>} onClick={sheets.saveSheets}/>
               {/* TODO: 整合性チェック機能を実装する */}
               <Button icon={<CheckSquareFilled/>}/>
             </Space>

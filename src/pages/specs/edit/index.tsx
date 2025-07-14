@@ -12,30 +12,30 @@ import { Button } from 'antd';
 import { Typography } from 'antd';
 import { Descriptions, DescriptionsProps } from 'antd';
 import { Card } from 'antd';
-import { IssueType, TableHookType } from "../../../types";
+import { TableHookType, SpecType } from "../../../types";
 import { ProgressTypeEnum, PriorityTypeEnum } from "../../../types";
 
 const { Title, Paragraph, Link } = Typography;
 
-export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
+export const EditSpecsPage: React.FC<TableHookType<SpecType>> = (specs) => {
     const params = useParams();
 
-    const issue = issues.items.filter(issue => issue.key === params.id)[0];
+    const spec = specs.items.filter(spec => spec.key === params.id)[0];
     const [new_comment, set_new_comment] = React.useState<string>('');
 
     //TODO: Duplicated Code
     const set_issue_attr = (attr: string, value: any) => {
-        issues.editItem(params.id as string, {...issue, [attr]: value});
+        specs.editItem(params.id as string, {...spec, [attr]: value});
     }
 
     const add_comment = (value: string) => {
-        issues.editItem(params.id as string, {...issue, comments: [...issue.comments, {date: dayjs(), comment: value}]});
+        specs.editItem(params.id as string, {...spec, comments: [...spec.comments, {date: dayjs(), comment: value}]});
     }
     const set_progress = (value: ProgressTypeEnum) => {
         if (value === ProgressTypeEnum.Closed) {
-            issues.editItem(params.id as string, {...issue, progress: value, closed_date: dayjs()});
+            specs.editItem(params.id as string, {...spec, progress: value, closed_date: dayjs()});
         } else {
-            issues.editItem(params.id as string, {...issue, progress: value, closed_date: null});
+            specs.editItem(params.id as string, {...spec, progress: value, closed_date: null});
         }
     }
 
@@ -47,7 +47,7 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
             label: 'Progress',
             children: 
                     <Select 
-                        defaultValue={issue.progress}
+                        defaultValue={spec.progress}
                         options={[
                             {label: ProgressTypeEnum.New.toString(), value: ProgressTypeEnum.New},
                             {label: ProgressTypeEnum.InProgress.toString(), value: ProgressTypeEnum.InProgress},
@@ -63,7 +63,7 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
             label: 'Priority',
             children:
                     <Select 
-                        defaultValue={issue.priority} 
+                        defaultValue={spec.priority} 
                         options={[
                             {label: PriorityTypeEnum.High.toString(), value: PriorityTypeEnum.High},
                             {label: PriorityTypeEnum.Middle.toString(), value: PriorityTypeEnum.Middle},
@@ -78,32 +78,20 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
         {
             key: '1',
             label: 'Systems',
-            children: <EmanagerTag tags={issue.system_tags} setTags={(tags: string[]) => set_issue_attr("system_tags", tags)}/>
+            children: <EmanagerTag tags={spec.system_tags} setTags={(tags: string[]) => set_issue_attr("system_tags", tags)}/>
         },
-        // TODO: Shotgun Surgery
-        {
-            key: '2',
-            label: 'Error Source',
-            children: <EmanagerTag tags={issue.error_source_tags} setTags={(tags: string[]) => set_issue_attr("error_source_tags", tags)}/>
-        },
-        // TODO: Shotgun Surgery
-        {
-            key: '3',
-            label: 'Error Category',
-            children: <EmanagerTag tags={issue.error_category_tags} setTags={(tags: string[]) => set_issue_attr("error_category_tags", tags)}/>
-        }
     ]
     const sa_informations: DescriptionsProps['items'] = [
         {
             key: '1',
             label: 'Ticket ID',
-            children: <Paragraph editable={{ onChange: (ticket_id: string) => set_issue_attr("ticket_id", ticket_id)}}>{issue.ticket_id}</Paragraph>
+            children: <Paragraph editable={{ onChange: (ticket_id: string) => set_issue_attr("ticket_id", ticket_id)}}>{spec.ticket_id}</Paragraph>
         },
         {
             key: '2',
             label: 'Link',
-            children: <Link href={issue.ticket_link.toString()} target="_blank">
-                <Paragraph editable={{ onChange: (ticket_link: string) => set_issue_attr("ticket_link", ticket_link) }}>{issue.ticket_link}</Paragraph>
+            children: <Link href={spec.ticket_link.toString()} target="_blank">
+                <Paragraph editable={{ onChange: (ticket_link: string) => set_issue_attr("ticket_link", ticket_link) }}>{spec.ticket_link}</Paragraph>
             </Link>
         }
     ]
@@ -111,34 +99,34 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
         {
             key: '1',
             label: 'Outage Date',
-            children: <DatePicker onChange={(outage_date: Dayjs) => set_issue_attr("outage_date", outage_date)} defaultValue={issue.outage_date} />
+            children: <DatePicker onChange={(outage_date: Dayjs) => set_issue_attr("outage_date", outage_date)} defaultValue={spec.outage_date} />
         },
         {
             key: '2',
             label: 'Due Date',
-            children: <DatePicker onChange={(due_date: Dayjs) => set_issue_attr("due_date", due_date)} defaultValue={issue.due_date} />
+            children: <DatePicker onChange={(due_date: Dayjs) => set_issue_attr("due_date", due_date)} defaultValue={spec.due_date} />
         },
         {
             key: '3',
             label: 'Creation Date',
-            children: issue.creation_date.format('YYYY-MM-DD')
+            children: spec.creation_date.format('YYYY-MM-DD')
         },
         {
             key: '4',
             label: 'Closed Date',
-            children: issue.closed_date ? issue.closed_date.format('YYYY-MM-DD') : 'Not closed yet'
+            children: spec.closed_date ? spec.closed_date.format('YYYY-MM-DD') : 'Not closed yet'
         },
         {
             key: '5',
             label: 'Elapsed days',
-            children: issue.progress === ProgressTypeEnum.New && issue.elapsed_days >= 7 ? <div style={{color: 'gold'}}>{issue.elapsed_days}</div> : <div style={{color: 'black'}}>{issue.elapsed_days}</div>
+            children: spec.progress === ProgressTypeEnum.New && spec.elapsed_days >= 7 ? <div style={{color: 'gold'}}>{spec.elapsed_days}</div> : <div style={{color: 'black'}}>{spec.elapsed_days}</div>
         },
         {
             key: '6',
             label: 'Remaining days',
-            children: issue.remaining_days <= 0 ? <div style={{color: 'red'}}>{issue.remaining_days}</div> : 
-                issue.remaining_days < 7 ? <div style={{color: 'orange'}}>{issue.remaining_days}</div> :
-                <div style={{color: 'black'}}>{issue.remaining_days}</div>
+            children: spec.remaining_days <= 0 ? <div style={{color: 'red'}}>{spec.remaining_days}</div> : 
+                spec.remaining_days < 7 ? <div style={{color: 'orange'}}>{spec.remaining_days}</div> :
+                <div style={{color: 'black'}}>{spec.remaining_days}</div>
         }
     ]
 
@@ -149,7 +137,7 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
             <Row style={{ marginBottom: 24 }}>
                 <Space direction="horizontal" style={{ justifyContent: 'space-between', width: '100%' }}>
                     <Typography.Title editable={{ onChange: (title: string) => set_issue_attr("title", title) }} level={1} style={{ marginBottom: 12 }}>
-                        {issue.title}
+                        {spec.title}
                     </Typography.Title>
                     <Button variant='outlined' icon={<MenuFoldOutlined/>} onClick={() => {setOpen(true)}}/>
                     <Drawer onClose={() => {setOpen(false)}} open={open}>
@@ -167,7 +155,7 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
                 <Typography>
                     <Title level={2}>Abstract</Title>
                     <Paragraph editable={{ onChange: (abstract: string) => set_issue_attr("abstract", abstract) }}>
-                        {issue.abstract}
+                        {spec.abstract}
                     </Paragraph>
                 </Typography>
             </Row>
@@ -175,7 +163,7 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
                 <Typography>
                     <Title level={2}>Statement</Title>
                     <Paragraph editable={{ onChange: (statement: string) => set_issue_attr("statement", statement) }}>
-                        {issue.statement}
+                        {spec.statement}
                     </Paragraph>
                 </Typography>
             </Row>
@@ -183,7 +171,7 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
                 <Typography>
                     <Title level={2}>Workaround</Title>
                     <Paragraph editable={{ onChange: (workaround: string) => set_issue_attr("workaround", workaround) }}>
-                        {issue.workaround}
+                        {spec.workaround}
                     </Paragraph>
                 </Typography>
             </Row>
@@ -191,13 +179,13 @@ export const EditIssuePage: React.FC<TableHookType<IssueType>> = (issues) => {
                 <Typography>
                     <Title level={2}>Solution</Title>
                     <Paragraph editable={{ onChange: (solution: string) => set_issue_attr("solution", solution) }}>
-                        {issue.solution}
+                        {spec.solution}
                     </Paragraph>
                 </Typography>
             </Row>
             <Row style={{ marginBottom: 24 }}>
                 <Space direction="vertical" size={16}>
-                    {issue.comments.map((comment, index) => (
+                    {spec.comments.map((comment, index) => (
                         <Card title={comment.date.format('YYYY-MM-DD')} style={{borderColor: 'lightgray'}} key={index}>
                             <p>{comment.comment}</p>
                         </Card>

@@ -2,7 +2,7 @@ import React from "react"
 import { Row, Col, Statistic } from 'antd';
 import { DatePicker } from 'antd';
 import { Line, Pie } from '@ant-design/plots';
-import { IssuesHookType, ProgressTypeEnum } from "../../types";
+import { TableHookType, ProgressTypeEnum, IssueType } from "../../types";
 import dayjs, { Dayjs } from 'dayjs';
 import { Typography } from 'antd';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -10,10 +10,10 @@ import isBetween from 'dayjs/plugin/isBetween';
 const { Title } = Typography;
 dayjs.extend(isBetween);
 
-export const DashboardPage: React.FC<IssuesHookType> = (issues) => {
-    const overdue_tasks = issues.issues.filter(issue => issue.remaining_days <= 0).length;
-    const close_deadline_tasks = issues.issues.filter(issue => issue.remaining_days > 0 && issue.remaining_days < 7).length;
-    const abandoned_tasks = issues.issues.filter(issue => issue.progress === ProgressTypeEnum.New && issue.elapsed_days >= 7).length;
+export const DashboardPage: React.FC<TableHookType<IssueType>> = (issues) => {
+    const overdue_tasks = issues.items.filter(issue => issue.remaining_days <= 0).length;
+    const close_deadline_tasks = issues.items.filter(issue => issue.remaining_days > 0 && issue.remaining_days < 7).length;
+    const abandoned_tasks = issues.items.filter(issue => issue.progress === ProgressTypeEnum.New && issue.elapsed_days >= 7).length;
 
     const [start_date, set_start_date] = React.useState<Dayjs>(dayjs().add(-7, 'day'));
     const [end_date, set_end_date] = React.useState<Dayjs>(dayjs().add(7, 'day'));
@@ -25,7 +25,7 @@ export const DashboardPage: React.FC<IssuesHookType> = (issues) => {
     };
 
     const burndown_period = end_date.diff(start_date, 'day') + 1;
-    const issues_on_date = (date: Dayjs) => issues.issues.filter(issue => {
+    const issues_on_date = (date: Dayjs) => issues.items.filter(issue => {
         const start = issue.outage_date.isAfter(date) ? issue.outage_date : date;
         const end = issue.closed_date?.isBefore(end_date) ? issue.closed_date : end_date;
 
@@ -50,13 +50,13 @@ export const DashboardPage: React.FC<IssuesHookType> = (issues) => {
         })
     });
 
-    const count_error_category = issues.issues.reduce((acc, Issue) => {
+    const count_error_category = issues.items.reduce((acc, Issue) => {
         Issue.error_category_tags.forEach(tag => {
             acc[tag] = acc[tag] ? acc[tag] + 1 : 1;
         });
         return acc;
     }, {} as {[key: string]: number});
-    const count_error_source = issues.issues.reduce((acc, Issue) => {
+    const count_error_source = issues.items.reduce((acc, Issue) => {
         Issue.error_source_tags.forEach(tag => {
             acc[tag] = acc[tag] ? acc[tag] + 1 : 1;
         });
